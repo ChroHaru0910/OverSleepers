@@ -290,6 +290,8 @@ MonoBehaviour:
   - {fileID: 1368589711}
   - {fileID: 2107541991}
   text: {fileID: 58383648}
+  seNum: 0
+  changeNum: 5
 --- !u!1 &79453460
 GameObject:
   m_ObjectHideFlags: 0
@@ -438,6 +440,54 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   soundObj: {fileID: 750742301}
+--- !u!1 &110793185
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 110793187}
+  - component: {fileID: 110793186}
+  m_Layer: 0
+  m_Name: WindowController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &110793186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 110793185}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 26d45c049be268f4d8f80245b615ebcc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  windowObj:
+  - {fileID: 236250817}
+  - {fileID: 750742301}
+  - {fileID: 662290286}
+--- !u!4 &110793187
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 110793185}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &168840770
 GameObject:
   m_ObjectHideFlags: 0
@@ -1238,7 +1288,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &750742302
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1460,7 +1510,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 884490027}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -1602,7 +1652,6 @@ GameObject:
   - component: {fileID: 902588445}
   - component: {fileID: 902588447}
   - component: {fileID: 902588446}
-  - component: {fileID: 902588448}
   m_Layer: 5
   m_Name: SelectCursor
   m_TagString: Untagged
@@ -1668,31 +1717,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 902588444}
   m_CullTransparentMesh: 1
---- !u!114 &902588448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 902588444}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b79b468abb1374e418ed18295a292c5e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  selectObj:
-  - {fileID: 1488476846}
-  - {fileID: 2145817294}
-  - {fileID: 1627506434}
-  - {fileID: 459341092}
-  - {fileID: 829298818}
-  backObj: {fileID: 750742301}
-  uiElements:
-  - {fileID: 1488476847}
-  - {fileID: 2145817295}
-  - {fileID: 1627506435}
-  - {fileID: 459341093}
-  - {fileID: 829298819}
 --- !u!1 &906271186
 GameObject:
   m_ObjectHideFlags: 0
@@ -2532,8 +2556,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1488476851}
-        m_TargetAssemblyTypeName: BackButton, Assembly-CSharp
-        m_MethodName: OnClickBackButton
+        m_TargetAssemblyTypeName: GenericButtonHandler, Assembly-CSharp
+        m_MethodName: ToggleActive
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2590,10 +2614,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1488476846}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a136e7021efab524683167d315faccaf, type: 3}
+  m_Script: {fileID: 11500000, guid: b8c120fee6923ec4b84fe339dbd2a5ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obj: {fileID: 750742301}
+  targetObj: {fileID: 750742301}
 --- !u!1 &1493278701
 GameObject:
   m_ObjectHideFlags: 0
