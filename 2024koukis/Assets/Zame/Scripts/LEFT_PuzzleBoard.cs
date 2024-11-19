@@ -75,9 +75,10 @@ public class LEFT_PuzzleBoard : MonoBehaviour
         return objList;
     }
 
-    // Debug.Log( p.ReturnList()[0].posColumns[0]);
 }
 public class LEFTWolrdVec2
 {
     public Vector2[] posColumns;
 }
+
+
