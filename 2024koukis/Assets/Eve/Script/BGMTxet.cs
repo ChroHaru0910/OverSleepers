@@ -39,28 +39,24 @@ public class BGMTxet : MonoBehaviour
             BGMBar[0].SetActive(true);
             BGMBar[1].SetActive(true);
             BGMBar[2].SetActive(true);
-            Debug.Log("67%à»è„");
         }
         else if (bgmNum < twoThird && bgmNum >= oneThird)
         {
             BGMBar[0].SetActive(true);
             BGMBar[1].SetActive(true);
             BGMBar[2].SetActive(false);
-            Debug.Log("34%à»è„");
         }
         else if (bgmNum < oneThird && bgmNum > minNum)
         {
             BGMBar[0].SetActive(true);
             BGMBar[1].SetActive(false);
             BGMBar[2].SetActive(false);
-            Debug.Log("1%à»è„");
         }
         else if (bgmNum == minNum)
         {
             BGMBar[0].SetActive(false);
             BGMBar[1].SetActive(false);
             BGMBar[2].SetActive(false);
-            Debug.Log("0%");
         }
     }
 
