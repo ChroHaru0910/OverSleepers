@@ -121,7 +121,7 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        text.text = "スタート！！";
+                        text.text = "スタート!!";
                         timer += Time.deltaTime;
                         if (timer >= maxTime)
                         {
