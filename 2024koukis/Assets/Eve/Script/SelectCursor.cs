@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class SelectCursor : MonoBehaviour
 {
+    [SerializeField] GameObject backObj;
+    [SerializeField] GameObject soundObj;
+
     RectTransform rectPos;                              //RectTransformの取得用
     private Vector3 backPos = new Vector3(-540, 400, 0);        //戻るボタンのPosition
     private Vector3 audioPos = new Vector3(330, 170, 0);        //サウンド設定ボタンのPosition
@@ -15,6 +18,11 @@ public class SelectCursor : MonoBehaviour
 
     EndButton end;
 
+    enum Device
+    {
+        KeyBoard,
+        Controller,
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -24,11 +32,42 @@ public class SelectCursor : MonoBehaviour
         selectNum = 0;
 
         end = GetComponent<EndButton>();
+
+
+        string[] connectedJoysticks = Input.GetJoystickNames();
+        foreach (string joystick in connectedJoysticks)
+        {
+            Debug.Log("Connected Joystick: " + joystick);
+        }
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        float L_Stick_H = Input.GetAxis("L_Stick_H");
+        float L_Stick_V = Input.GetAxis("L_Stick_V");
+
+        if(L_Stick_H!=0||L_Stick_V!=0)
+        {
+            Debug.Log("stick:" + L_Stick_H + "," + L_Stick_V);
+        }
+
+        if(Input.GetButtonDown("Jump"))
+        {
+            Debug.Log("aaa");
+        }
+
+
+        for (int i = 0; i < 20; i++) // 最大20個のボタンを確認（調整可能）
+        {
+            if (Input.GetButtonDown("joystick button 0" + i))
+            {
+                Debug.Log("Joystick Button " + i + " Pressed");
+            }
+        }
+
+
         MoveCursor();               //カーソルの移動
 
         if(Input.GetKeyDown(KeyCode.Return))
@@ -37,10 +76,12 @@ public class SelectCursor : MonoBehaviour
             switch (selectNum)
             {
                 case 0:
+                    backObj.SetActive(false);
                     Debug.Log("back");
                     break;
 
                 case 1:
+                    soundObj.SetActive(true);
                     Debug.Log("audio");
                     break;
 
@@ -49,7 +90,12 @@ public class SelectCursor : MonoBehaviour
                     break;
 
                 case 3:
-                    end.button.onClick.AddListener(end.SwitchObj);
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;//ゲームプレイ終了
+#else
+    Application.Quit();//ゲームプレイ終了
+#endif
+                    Debug.Log("end");
                     break;
             }
         }

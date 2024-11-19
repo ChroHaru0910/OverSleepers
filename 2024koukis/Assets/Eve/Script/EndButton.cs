@@ -5,18 +5,7 @@ using UnityEngine.UI;
 
 public class EndButton : MonoBehaviour
 {
-    public Button button;
-
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        button = GetComponent<Button>();
-        button.onClick.AddListener(SwitchObj);
-    }
-
-    // Update is called once per frame
-    public void SwitchObj()
+    public void OnClickEndButton()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;//ゲームプレイ終了
