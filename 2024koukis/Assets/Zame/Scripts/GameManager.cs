@@ -20,6 +20,14 @@ public class GameManager : MonoBehaviour
     // ゲーム開始の合図を記載
     [SerializeField] Text text;
 
+    // 勝敗反映テキスト
+    [SerializeField] Text PlLtex;
+    [SerializeField] Text PlRtex;
+    // 勝敗プレイヤー
+    // TRUE=PL1,FALSE=PL2
+    // 負けたプレイヤで判断
+    bool winLose = false;
+
     // 座標を保存するリスト
     List<RIGHTWolrdVec2> listRIGHT = new List<RIGHTWolrdVec2>();
     List<LEFTWolrdVec2> listLEFT = new List<LEFTWolrdVec2>();
@@ -139,11 +147,14 @@ public class GameManager : MonoBehaviour
                 // 勝敗
                 if (p1Controller.LOSEFLAG)
                 {
+                    winLose = true;
                     game = GAME.RESULT;
+                    
                     return;
                 }
                 else if (p2Controller.LOSEFLAG)
                 {
+                    winLose = false;
                     game = GAME.RESULT;
                 }
 
@@ -165,6 +176,23 @@ public class GameManager : MonoBehaviour
                 p2Controller.Game();
                 break;
             case GAME.RESULT:
+                if (img.color.a <= 0.5f)
+                {
+                    col.ImgFade(img, spdImg);
+                }
+                else
+                {
+                    if(winLose)
+                    {
+                        PlLtex.text = "LOSE";
+                        PlRtex.text = "WIN!!";
+                    }
+                    else
+                    {
+                        PlLtex.text = "WIN!!";
+                        PlRtex.text = "LOSE";
+                    }
+                }
                 Debug.Log("結果発表");
                 break;
         }
