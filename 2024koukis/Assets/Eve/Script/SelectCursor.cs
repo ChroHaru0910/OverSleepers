@@ -34,38 +34,38 @@ public class SelectCursor : MonoBehaviour
         end = GetComponent<EndButton>();
 
 
-        string[] connectedJoysticks = Input.GetJoystickNames();
-        foreach (string joystick in connectedJoysticks)
-        {
-            Debug.Log("Connected Joystick: " + joystick);
-        }
+        //string[] connectedJoysticks = Input.GetJoystickNames();
+        //foreach (string joystick in connectedJoysticks)
+        //{
+        //    Debug.Log("Connected Joystick: " + joystick);
+        //}
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        float L_Stick_H = Input.GetAxis("L_Stick_H");
-        float L_Stick_V = Input.GetAxis("L_Stick_V");
+        //float L_Stick_H = Input.GetAxis("L_Stick_H");
+        //float L_Stick_V = Input.GetAxis("L_Stick_V");
 
-        if(L_Stick_H!=0||L_Stick_V!=0)
-        {
-            Debug.Log("stick:" + L_Stick_H + "," + L_Stick_V);
-        }
+        //if(L_Stick_H!=0||L_Stick_V!=0)
+        //{
+        //    Debug.Log("stick:" + L_Stick_H + "," + L_Stick_V);
+        //}
 
-        if(Input.GetButtonDown("Jump"))
-        {
-            Debug.Log("aaa");
-        }
+        //if(Input.GetButtonDown("Jump"))
+        //{
+        //    Debug.Log("aaa");
+        //}
 
 
-        for (int i = 0; i < 20; i++) // 最大20個のボタンを確認（調整可能）
-        {
-            if (Input.GetButtonDown("joystick button 0" + i))
-            {
-                Debug.Log("Joystick Button " + i + " Pressed");
-            }
-        }
+        //for (int i = 0; i < 20; i++) // 最大20個のボタンを確認（調整可能）
+        //{
+        //    if (Input.GetButtonDown("joystick button 0" + i))
+        //    {
+        //        Debug.Log("Joystick Button " + i + " Pressed");
+        //    }
+        //}
 
 
         MoveCursor();               //カーソルの移動
@@ -77,10 +77,12 @@ public class SelectCursor : MonoBehaviour
             {
                 case 0:
                     backObj.SetActive(false);
+                    soundObj.SetActive(false);
                     Debug.Log("back");
                     break;
 
                 case 1:
+                    backObj.SetActive(false);
                     soundObj.SetActive(true);
                     Debug.Log("audio");
                     break;

@@ -12,10 +12,12 @@ public class BGMTxet : MonoBehaviour
 
     public Text text;
 
-    private int bgmNum;
+    public int bgmNum;
+    
     private int minNum = 0;
     private int maxNum = 100;
-    private int changeNum = 5;
+    public int changeNum = 5;
+
 
     // Start is called before the first frame update
     void Start()

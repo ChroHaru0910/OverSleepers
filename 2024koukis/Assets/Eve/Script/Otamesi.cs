@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class Otamesi : MonoBehaviour
 {
+
     [SerializeField] private List<GameObject> selectObj = new List<GameObject>();   //カーソルを持っていきたいオブジェクト選択して、登録
+    [SerializeField] GameObject backObj;
 
     private List<Vector3> selectPos = new List<Vector3>();  //selectObjの座標を登録
 
@@ -79,12 +81,20 @@ public class Otamesi : MonoBehaviour
 
     void SelectMenu()
     {
-        switch(selectNum)
+        if(Input.GetKeyDown(KeyCode.Return))
         {
-            case 0:
+            switch (selectNum)
+            {
+                case 0:
+                    backObj.SetActive(false);
+                    break;
+                case 1:
 
-                break;
+                    break;
+                   
+            }
         }
+        
     }
 
 }

@@ -1686,6 +1686,7 @@ MonoBehaviour:
   - {fileID: 1627506434}
   - {fileID: 459341092}
   - {fileID: 829298818}
+  backObj: {fileID: 750742301}
   uiElements:
   - {fileID: 1488476847}
   - {fileID: 2145817295}
@@ -3796,6 +3797,8 @@ MonoBehaviour:
   - {fileID: 1871457595}
   - {fileID: 1363700091}
   text: {fileID: 2105239366}
+  bgmNum: 0
+  changeNum: 5
 --- !u!1 &2107541991
 GameObject:
   m_ObjectHideFlags: 0
