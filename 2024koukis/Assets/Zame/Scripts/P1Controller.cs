@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 public class P1Controller : MonoBehaviour
 {
+    // 変数まとめ
+    #region Field
     // 生成した駒をまとめるオブジェクト
     [SerializeField] GameObject P1;
     // 生成するコマの情報
@@ -32,39 +34,24 @@ public class P1Controller : MonoBehaviour
     // 負け判定
     bool gameLoseFlg = false;
 
+    // 削除処理
     bool puzzleCleared = false;
     int num = 0;
     float timer = 0;
 
+    // ネクスト表示
+    NextPuzzleUI next;
+    [SerializeField] Image[] images;
+    #endregion
 
     // GameManagerで呼び出し
     public void Game()
     {
         P1Input();
-        Droppuzzle();
         ChainPuzzle();
+        Droppuzzle();
     }
 
-    /// <summary>
-    /// 負け判定
-    /// </summary>
-    private void LoseMethod()
-    {
-        for (int i = 0; i < mypuzzleObj.Count; i++)
-        {
-            // 真ん中の一番上に置かれたら負け
-            if (mypuzzleObj[i].transform.position.y >= listLEFT[9].posColumns[3].y &&
-                mypuzzleObj[i].transform.position.x == listLEFT[9].posColumns[3].x)
-            {
-                gameLoseFlg = true;
-            }
-        }
-    }
-
-    public bool LOSEFLAG
-    {
-        get { return gameLoseFlg; }
-    }
 
     /// <summary>
     /// 入力処理
@@ -100,6 +87,7 @@ public class P1Controller : MonoBehaviour
     {
         // 連鎖中の場合は生成しない
         if (puzzleCleared) { return; }
+        NextOBJ();
         timer = 0;
         Cy = 9;
         Cx = 3;
@@ -109,7 +97,63 @@ public class P1Controller : MonoBehaviour
         mypuzzleObj.Add(ParentObj);
         isFlg = false;
     }
+    // ネクスト表示関連メソッド
+    #region NEXTOBJ
+    /// <summary>
+    /// インスタンス生成メソッド
+    /// </summary>
+    private void Instance()
+    {
+        // インスタンス生成
+        next = new NextPuzzleUI();
+    }
+    // 最初の表示
+    private void SetNextObj()
+    {
+        // リストに格納
+        List<GameObject> listObj = new List<GameObject>(puzzleQueue);
+        images[0].sprite = listObj[0].GetComponent<SpriteRenderer>().sprite;
+        images[1].sprite = listObj[1].GetComponent<SpriteRenderer>().sprite;
+    }
 
+    public void STARTSET()
+    {
+        Instance();
+        SetNextObj();
+    }
+
+    private void NextOBJ()
+    {
+        next.NextObjUI(puzzleQueue, images);
+    }
+    #endregion
+
+    // 負け判定関連メソッド
+    #region LOSE
+    /// <summary>
+    /// 負け判定
+    /// </summary>
+    private void LoseMethod()
+    {
+        for (int i = 0; i < mypuzzleObj.Count; i++)
+        {
+            // 真ん中の一番上に置かれたら負け
+            if (mypuzzleObj[i].transform.position.y >= listLEFT[9].posColumns[3].y &&
+                mypuzzleObj[i].transform.position.x == listLEFT[9].posColumns[3].x)
+            {
+                gameLoseFlg = true;
+            }
+        }
+    }
+
+    public bool LOSEFLAG
+    {
+        get { return gameLoseFlg; }
+    }
+    #endregion
+
+    // コマの移動に関するメソッド（盤面も含む）
+    #region PUZZLEMOVE
     // 落下処理
     private void Droppuzzle()
     {
@@ -140,6 +184,8 @@ public class P1Controller : MonoBehaviour
             }
         }
     }
+
+
 
     // 現在操作中のコマの下に別のコマが存在するか
     private bool SetPuzzle(GameObject obj)
@@ -210,7 +256,10 @@ public class P1Controller : MonoBehaviour
     {
         listLEFT = list;
     }
+    #endregion
 
+    // 揃ったコマの削除と連鎖チェック
+    #region PUZZLEDELETE
     /// <summary>
     /// 駒が消えるべきかチェックし、消す処理
     /// </summary>
@@ -288,30 +337,38 @@ public class P1Controller : MonoBehaviour
     /// <returns>駒が消えた場合true</returns>
     private bool ClearPuzzleIfSurrounded(int x, int y, int dx, int dy)
     {
+        // 始点の駒を取得
         GameObject startPuzzle = GetPuzzleAt(x, y);
         if (startPuzzle == null) return false;
 
+        // 終点の駒を取得
         int oppositeX = x + dx * 2;
         int oppositeY = y + dy * 2;
-
-        GameObject middlePuzzle = GetPuzzleAt(x + dx, y + dy);
-
         GameObject endPuzzle = GetPuzzleAt(oppositeX, oppositeY);
 
         if (endPuzzle == null) return false;
 
-        Color startColor = GetPuzzleColor(startPuzzle);
-        Color endColor = GetPuzzleColor(endPuzzle);
+        // スプライトを取得
+        Sprite startSprite = GetPuzzleSprite(startPuzzle);
+        Sprite endSprite = GetPuzzleSprite(endPuzzle);
 
-        if (startColor == endColor && startColor != Color.clear)
+        // 始点と終点のスプライトが一致している場合
+        if (startSprite == endSprite && startSprite != null)
         {
-
-            if (middlePuzzle != null && GetPuzzleColor(middlePuzzle) != startColor)
+            // 中間の駒を取得
+            GameObject middlePuzzle = GetPuzzleAt(x + dx, y + dy);
+            if (middlePuzzle != null)
             {
-                RemovePuzzle(startPuzzle);
-                RemovePuzzle(middlePuzzle);
-                RemovePuzzle(endPuzzle);
-                return true; // 駒を消した場合はtrueを返す
+                Sprite middleSprite = GetPuzzleSprite(middlePuzzle);
+
+                // 中間のスプライトが異なる場合
+                if (middleSprite != startSprite)
+                {
+                    RemovePuzzle(startPuzzle);
+                    RemovePuzzle(middlePuzzle);
+                    RemovePuzzle(endPuzzle);
+                    return true; // 駒を消した場合はtrueを返す
+                }
             }
         }
 
@@ -328,10 +385,10 @@ public class P1Controller : MonoBehaviour
     /// <summary>
     /// 駒の色を取得する
     /// </summary>
-    private Color GetPuzzleColor(GameObject puzzle)
+    private Sprite GetPuzzleSprite(GameObject puzzle)
     {
         SpriteRenderer spriteRenderer = puzzle.GetComponent<SpriteRenderer>();
-        return spriteRenderer != null ? spriteRenderer.color : Color.clear;
+        return spriteRenderer != null ? spriteRenderer.sprite : null;
     }
 
     /// <summary>
@@ -409,4 +466,5 @@ public class P1Controller : MonoBehaviour
     {
         puzzle.transform.position = newPos;
     }
+    #endregion
 }
