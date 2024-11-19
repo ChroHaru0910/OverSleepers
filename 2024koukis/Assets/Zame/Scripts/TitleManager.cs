@@ -36,7 +36,6 @@ public class TitleManager : MonoBehaviour
         {
             flg = true;   
         }
-        Debug.Log(flg);
         if(flg)
         {
             colFade.ImgFade(img, spdImg);
