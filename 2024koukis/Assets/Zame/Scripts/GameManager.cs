@@ -71,13 +71,17 @@ public class GameManager : MonoBehaviour
         listLEFT = boardLEFT.ReturnList();
         listRIGHT = boardRIGHT.ReturnList();
 
-        // 駒を生成
+        // 駒を二回生成（ネクスト表示のため）
+        generator.GENERATOR();
         generator.GENERATOR();
 
         // プレイヤーに座標リストをプレゼント
         p1Controller.RecieveList(listLEFT);
         p2Controller.RecieveList(listRIGHT);
 
+        // ネクスト表示の準備
+        p1Controller.STARTSET();
+        p2Controller.STARTSET();
     }
 
     // Update is called once per frame
@@ -132,21 +136,31 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case GAME.PLAY: // ゲーム開始
-                // 駒を生成
-                if(p1Controller.LOSEFLAG)
+                // 勝敗
+                if (p1Controller.LOSEFLAG)
                 {
                     game = GAME.RESULT;
                     return;
                 }
+                else if (p2Controller.LOSEFLAG)
+                {
+                    game = GAME.RESULT;
+                }
+
+                // 駒を生成
                 generator.GENERATOR();
+
                 if (p1Controller.IsFLAG)
                 {
+                    // ネクスト表示を更新して新規生成
                     p1Controller.GeneObj();
                 }
                 if (p2Controller.IsFLAG)
                 {
+                    // ネクスト表示を更新して新規生成
                     p2Controller.GeneObj();
                 }
+                // プレイヤー更新
                 p1Controller.Game();
                 p2Controller.Game();
                 break;
