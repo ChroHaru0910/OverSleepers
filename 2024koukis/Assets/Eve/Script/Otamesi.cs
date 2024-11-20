@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class Otamesi : MonoBehaviour
 {
+    [SerializeField] private GenericButtonHandler geneButton;
+    [SerializeField] private BGMTxet bgmText;
+    [SerializeField] private SEText seText;
 
     [SerializeField] private List<GameObject> selectObj = new List<GameObject>();   //カーソルを持っていきたいオブジェクト選択して、登録
-    [SerializeField] GameObject backObj;
+    [SerializeField] private List<GameObject> windowObj = new List<GameObject>();   //ウィンドウオブジェリスト
 
     private List<Vector3> selectPos = new List<Vector3>();  //selectObjの座標を登録
 
@@ -22,6 +25,24 @@ public class Otamesi : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        for (int i = 0; i < 2; i++)
+        {
+            Debug.Log("re");
+        }
+
+        if (bgmText == null)
+        {
+            bgmText = FindObjectOfType<BGMTxet>();
+        }
+        if (seText == null)
+        {
+            seText = FindObjectOfType<SEText>();
+        }
+        if (geneButton == null)
+        {
+            geneButton = FindObjectOfType<GenericButtonHandler>();
+        }
+
         //selectObjが選択されていないとき、コンソールに出力
         if (selectObj.Count == 0)
         {
@@ -86,10 +107,19 @@ public class Otamesi : MonoBehaviour
             switch (selectNum)
             {
                 case 0:
-                    backObj.SetActive(false);
+                    geneButton.ToggleActive();
                     break;
                 case 1:
-
+                    bgmText.DecButton();
+                    break;
+                case 2:
+                    bgmText.IncButton();
+                    break;
+                case 3:
+                    seText.seNum += seText.changeNum;
+                    break;
+                case 4:
+                    seText.DecButton();
                     break;
                    
             }
