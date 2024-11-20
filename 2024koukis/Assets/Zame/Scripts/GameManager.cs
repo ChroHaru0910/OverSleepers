@@ -44,6 +44,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] P1Controller p1Controller;
     [SerializeField] P2Controller p2Controller;
 
+    // jsonデータ
+    [SerializeField] VariableManager variable;
+
     // ゲーム状態管理の列挙体
     enum GAME
     {
@@ -59,6 +62,9 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        // データ読み込み
+        variable.LoadJson();
+
         // インスタンス生成
         col = new ColFade();
 
@@ -90,6 +96,9 @@ public class GameManager : MonoBehaviour
         // ネクスト表示の準備
         p1Controller.STARTSET();
         p2Controller.STARTSET();
+
+        // 変数のセット
+        p1Controller.SetUp();
     }
 
     // Update is called once per frame
@@ -152,15 +161,17 @@ public class GameManager : MonoBehaviour
                     
                     return;
                 }
-                else if (p2Controller.LOSEFLAG)
-                {
-                    winLose = false;
-                    game = GAME.RESULT;
-                }
+                // p2の死亡処理はデバッグプレイのためコメント
+                //else if (p2Controller.LOSEFLAG)
+                //{
+                //    winLose = false;
+                //    game = GAME.RESULT;
+                //}
 
                 // 駒を生成
                 generator.GENERATOR();
 
+                // それぞれの盤面にコマを生成
                 if (p1Controller.IsFLAG)
                 {
                     // ネクスト表示を更新して新規生成
@@ -171,17 +182,20 @@ public class GameManager : MonoBehaviour
                     // ネクスト表示を更新して新規生成
                     p2Controller.GeneObj();
                 }
+
                 // プレイヤー更新
                 p1Controller.Game();
                 p2Controller.Game();
                 break;
             case GAME.RESULT:
+                // フェード
                 if (img.color.a <= 0.5f)
                 {
                     col.ImgFade(img, spdImg);
                 }
                 else
                 {
+                    // 勝敗のテキスト
                     if(winLose)
                     {
                         PlLtex.text = "LOSE";
@@ -194,6 +208,8 @@ public class GameManager : MonoBehaviour
                     }
                 }
                 Debug.Log("結果発表");
+
+                // ここから再戦できるようにする
                 break;
         }
     }

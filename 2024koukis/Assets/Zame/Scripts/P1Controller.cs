@@ -21,9 +21,9 @@ public class P1Controller : MonoBehaviour
     GameObject ParentObj;
 
     // 自由落下する速度
-    const float CONSTdropTime = 0.5f; // 最大時間
-    float dropTime = 0.5f;            // 時間設定
-    float dropTimerCnt = 0.0f;        // カウント用
+    float defaultDrop= 0.5f; // デフォルトの値(データが読み込まない場合)
+    float dropTime = 0.5f;      // 時間設定
+    float dropTimerCnt = 0.0f;  // カウント用
 
     // 移動制限
     int Cy = 9;
@@ -52,7 +52,37 @@ public class P1Controller : MonoBehaviour
         Droppuzzle();
     }
 
-
+    public void SetUp()
+    {
+        SetDropTimeFromVariables();
+    }
+    // プレイヤー1のコントローラーに変数を設定するためのメソッド
+    private void SetDropTimeFromVariables()
+    {
+        // 例: 変数名が "dropTime" で値が float 型の場合
+        var dropTimeVariable = VariableManager.Instance.Variables.Find(v => v.Name == "defaultDrop");
+        if (dropTimeVariable != null && float.TryParse(dropTimeVariable.Value, out float parsedDropTime))
+        {
+            // データを基にデフォルトの値変更
+            defaultDrop = parsedDropTime;
+            Debug.Log("defaultDrop が設定されました: " + defaultDrop);
+        }
+        else
+        {
+            if (dropTimeVariable == null)
+            {
+                Debug.LogWarning("defaultDrop 変数が JSON ファイルに存在しません。デフォルト値を使用します。");
+            }
+            else
+            {
+                Debug.LogWarning($"defaultDrop の値 '{dropTimeVariable.Value}' は無効です。デフォルト値を使用します。");
+            }
+            // もともとの速度設定
+            dropTime = defaultDrop;  // デフォルト値を使用
+        }
+        // 初期速度設定
+        dropTime = defaultDrop;
+    }
     /// <summary>
     /// 入力処理
     /// </summary>
@@ -76,7 +106,7 @@ public class P1Controller : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.DownArrow))
         {
-            dropTime = CONSTdropTime;  // 通常の落下速度に戻す
+            dropTime = defaultDrop;  // 通常の落下速度に戻す
         }
     }
 

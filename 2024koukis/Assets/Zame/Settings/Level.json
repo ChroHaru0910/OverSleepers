@@ -1,0 +1,14 @@
+[
+  {
+    "Name": "defaultDrop",
+    "Type": "float",
+    "Value": "1.0",
+    "Comment": "\u30B3\u30DE\u306E\u843D\u4E0B\u901F\u5EA6\u3092\u8A18\u5165"
+  },
+  {
+    "Name": "",
+    "Type": null,
+    "Value": null,
+    "Comment": null
+  }
+]

@@ -1,0 +1,50 @@
+﻿<Window x:Class="VariableManagerApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:System="clr-namespace:System;assembly=mscorlib"
+        Title="変数管理アプリ" Height="450" Width="800">
+    <Grid>
+        <DataGrid x:Name="VariableDataGrid" AutoGenerateColumns="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Margin="10" IsReadOnly="False">
+            <DataGrid.Columns>
+                <!-- 名前列 -->
+                <DataGridTextColumn Header="名前" Binding="{Binding Name}" Width="*" />
+
+                <!-- 型名列 (プルダウン形式) -->
+                <DataGridTemplateColumn Header="型" Width="*">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <!-- 表示モードのテンプレート -->
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Type}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                    <DataGridTemplateColumn.CellEditingTemplate>
+                        <!-- 編集モードのテンプレート -->
+                        <DataTemplate>
+                            <ComboBox SelectedItem="{Binding Type, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="100">
+                                <ComboBox.ItemsSource>
+                                    <x:Array Type="{x:Type System:String}">
+                                        <System:String>int</System:String>
+                                        <System:String>float</System:String>
+                                        <System:String>string</System:String>
+                                    </x:Array>
+                                </ComboBox.ItemsSource>
+                            </ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellEditingTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- 値列 -->
+                <DataGridTextColumn Header="値" Binding="{Binding Value}" Width="*" />
+
+                <!-- コメント列 -->
+                <DataGridTextColumn Header="コメント" Binding="{Binding Comment}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- 保存ボタン -->
+        <Button Content="変数を保存" HorizontalAlignment="Left" VerticalAlignment="Bottom" Width="120" Margin="10,0,0,10" Click="SaveVariables_Click"/>
+
+        <!-- 読み込みボタン -->
+        <Button Content="変数を読み込む" HorizontalAlignment="Right" VerticalAlignment="Bottom" Width="120" Margin="0,0,10,10" Click="LoadVariables_Click"/>
+    </Grid>
+</Window>

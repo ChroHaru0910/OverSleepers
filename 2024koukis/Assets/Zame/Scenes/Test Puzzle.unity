@@ -8419,6 +8419,7 @@ GameObject:
   - component: {fileID: 2144268167}
   - component: {fileID: 2144268170}
   - component: {fileID: 2144268169}
+  - component: {fileID: 2144268171}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -8448,6 +8449,7 @@ MonoBehaviour:
   generator: {fileID: 40078789}
   p1Controller: {fileID: 2144268170}
   p2Controller: {fileID: 2144268169}
+  variable: {fileID: 2144268171}
 --- !u!4 &2144268168
 Transform:
   m_ObjectHideFlags: 0
@@ -8495,3 +8497,15 @@ MonoBehaviour:
   images:
   - {fileID: 2117683689}
   - {fileID: 44586507}
+--- !u!114 &2144268171
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2144268166}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6a30589051734046a03fcffc0dbe55a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
