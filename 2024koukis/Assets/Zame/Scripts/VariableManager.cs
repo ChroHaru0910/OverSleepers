@@ -17,7 +17,7 @@ public class VariableManager : MonoBehaviour
     public static VariableManager Instance { get; private set; }
 
     // JSON ファイルのパス
-    string jsonFilePath = "C:/Users/user/Desktop/study/team/2024kouki/LevelManager/LevelManager/bin/Debug/Variables.json";
+    string jsonFilePath = "../LevelManager/LevelManager/bin/Debug/Variables.json";
     string jsonFilePathCopy = "Assets/Zame/Settings/Level.json";
     string jsonFilePathUNITY = "Zame/Settings/Level.json";
     public List<VariableInfo> Variables { get; private set; } = new List<VariableInfo>();
