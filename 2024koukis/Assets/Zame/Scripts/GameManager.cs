@@ -46,6 +46,8 @@ public class GameManager : MonoBehaviour
 
     // jsonデータ
     [SerializeField] VariableManager variable;
+    // 変数の値をデータをもとに変更
+    [SerializeField] VariableValue value;
 
     // ゲーム状態管理の列挙体
     enum GAME
@@ -64,6 +66,12 @@ public class GameManager : MonoBehaviour
     {
         // データ読み込み
         variable.LoadJson();
+
+        // 変数のセット
+        value.SETUP();
+
+        // プレイヤー１に値をセット
+        p1Controller.SetUp=value.DROPSPD;
 
         // インスタンス生成
         col = new ColFade();
@@ -96,9 +104,6 @@ public class GameManager : MonoBehaviour
         // ネクスト表示の準備
         p1Controller.STARTSET();
         p2Controller.STARTSET();
-
-        // 変数のセット
-        p1Controller.SetUp();
     }
 
     // Update is called once per frame
