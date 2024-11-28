@@ -21,9 +21,9 @@ public class P1Controller : MonoBehaviour
     GameObject ParentObj;
 
     // 自由落下する速度
-    const float CONSTdropTime = 0.5f; // 最大時間
-    float dropTime = 0.5f;            // 時間設定
-    float dropTimerCnt = 0.0f;        // カウント用
+    float defaultDrop= 0.5f; // デフォルトの値(データが読み込まない場合)
+    float dropTime = 0.5f;      // 時間設定
+    float dropTimerCnt = 0.0f;  // カウント用
 
     // 移動制限
     int Cy = 9;
@@ -51,8 +51,13 @@ public class P1Controller : MonoBehaviour
         ChainPuzzle();
         Droppuzzle();
     }
-
-
+    /// <summary>
+    /// 落下速度の設定
+    /// </summary>
+    public float SetUp
+    {
+        set { dropTime = value; }
+    }
     /// <summary>
     /// 入力処理
     /// </summary>
@@ -76,7 +81,7 @@ public class P1Controller : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.DownArrow))
         {
-            dropTime = CONSTdropTime;  // 通常の落下速度に戻す
+            dropTime = defaultDrop;  // 通常の落下速度に戻す
         }
     }
 
@@ -302,7 +307,7 @@ public class P1Controller : MonoBehaviour
                 case 0:
                     ShiftPuzzlesDown();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -311,7 +316,7 @@ public class P1Controller : MonoBehaviour
                 case 1:
                     CheckAndClearPuzzle();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -319,9 +324,22 @@ public class P1Controller : MonoBehaviour
                     break;
                 case 2:
                     ShiftPuzzlesDown();
-                    timer = 0.25f; // 次の処理スキップ
-                    puzzleCleared = false;
-                    num = 0;
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        puzzleCleared = false;
+                        CheckAndClearPuzzle();
+                        timer = 0;
+                        num++;
+                    }
+                    break;
+                case 3:
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        timer = 0;
+                        num = 0;
+                    }
                     break;
             }
         }
