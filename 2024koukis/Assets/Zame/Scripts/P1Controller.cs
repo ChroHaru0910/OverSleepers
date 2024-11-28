@@ -51,37 +51,12 @@ public class P1Controller : MonoBehaviour
         ChainPuzzle();
         Droppuzzle();
     }
-
-    public void SetUp()
+    /// <summary>
+    /// 落下速度の設定
+    /// </summary>
+    public float SetUp
     {
-        SetDropTimeFromVariables();
-    }
-    // プレイヤー1のコントローラーに変数を設定するためのメソッド
-    private void SetDropTimeFromVariables()
-    {
-        // 例: 変数名が "dropTime" で値が float 型の場合
-        var dropTimeVariable = VariableManager.Instance.Variables.Find(v => v.Name == "defaultDrop");
-        if (dropTimeVariable != null && float.TryParse(dropTimeVariable.Value, out float parsedDropTime))
-        {
-            // データを基にデフォルトの値変更
-            defaultDrop = parsedDropTime;
-            Debug.Log("defaultDrop が設定されました: " + defaultDrop);
-        }
-        else
-        {
-            if (dropTimeVariable == null)
-            {
-                Debug.LogWarning("defaultDrop 変数が JSON ファイルに存在しません。デフォルト値を使用します。");
-            }
-            else
-            {
-                Debug.LogWarning($"defaultDrop の値 '{dropTimeVariable.Value}' は無効です。デフォルト値を使用します。");
-            }
-            // もともとの速度設定
-            dropTime = defaultDrop;  // デフォルト値を使用
-        }
-        // 初期速度設定
-        dropTime = defaultDrop;
+        set { dropTime = value; }
     }
     /// <summary>
     /// 入力処理
@@ -332,7 +307,7 @@ public class P1Controller : MonoBehaviour
                 case 0:
                     ShiftPuzzlesDown();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -341,7 +316,7 @@ public class P1Controller : MonoBehaviour
                 case 1:
                     CheckAndClearPuzzle();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -349,9 +324,22 @@ public class P1Controller : MonoBehaviour
                     break;
                 case 2:
                     ShiftPuzzlesDown();
-                    timer = 0.25f; // 次の処理スキップ
-                    puzzleCleared = false;
-                    num = 0;
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        puzzleCleared = false;
+                        CheckAndClearPuzzle();
+                        timer = 0;
+                        num++;
+                    }
+                    break;
+                case 3:
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        timer = 0;
+                        num = 0;
+                    }
                     break;
             }
         }
