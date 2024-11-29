@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     #region field
+    // ここの拡張性
     // パズルの盤面を保存する
     [SerializeField] LEFT_PuzzleBoard boardLEFT;
     [SerializeField] RIGHT_PuzzleBoard boardRIGHT;
@@ -15,18 +16,18 @@ public class GameManager : MonoBehaviour
     // フェード速度
     [SerializeField] float spdImg=0.03f;
     // フェードクラス
-    ColFade col;
+    ColFade colClass;
 
     // ゲーム開始の合図を記載
-    [SerializeField] Text text;
+    [SerializeField] Text Readytext;
 
     // 勝敗反映テキスト
-    [SerializeField] Text PlLtex;
-    [SerializeField] Text PlRtex;
+    [SerializeField] Text Pl1text;
+    [SerializeField] Text Pl2text;
     // 勝敗プレイヤー
     // TRUE=PL1,FALSE=PL2
     // 負けたプレイヤで判断
-    bool winLose = false;
+    bool isLose = false;
 
     // 座標を保存するリスト
     List<RIGHTWolrdVec2> listRIGHT = new List<RIGHTWolrdVec2>();
@@ -59,7 +60,7 @@ public class GameManager : MonoBehaviour
     }
 
     // 列挙体の変数
-    private GAME game;
+    private GAME gameState;
     #endregion
 
     void Start()
@@ -74,16 +75,16 @@ public class GameManager : MonoBehaviour
         p1Controller.SetUp=value.DROPSPD;
 
         // インスタンス生成
-        col = new ColFade();
+        colClass = new ColFade();
 
         // 透明度半分
-        col.ImgFade(img, 0.5f);
+        colClass.ImgFade(img, 0.5f);
 
         // 合図の準備
-        text.text = "レディー!!";
+        Readytext.text = "レディー!!";
 
         // スイッチ処理準備
-        game = GAME.READY;
+        gameState = GAME.READY;
 
         // 盤面保存
         boardLEFT.LeftSet();
@@ -106,11 +107,10 @@ public class GameManager : MonoBehaviour
         p2Controller.STARTSET();
     }
 
-    // Update is called once per frame
     void Update()
     {
         // ゲームループはここで
-        switch(game)
+        switch(gameState)
         {
             case GAME.READY: // ゲームの状態はready 正しくデータをもらえたらスタートしていく
                  // startメソッドでデータが正しく貰えてない場合に
@@ -125,25 +125,23 @@ public class GameManager : MonoBehaviour
                     listRIGHT = boardRIGHT.ReturnList();
                 }
 
-
                 timer += Time.deltaTime;
                 if (timer >= maxTime)
                 {
                     // タイマーの値を元通りに
                     timer = 0;
-                    game = GAME.START;
+                    gameState = GAME.START;
                 }
-
                 break;
             case GAME.START: // ゲームスタートの合図を送る
                 {
                     if (img.color.a >= 0)
                     {
-                        col.ImgFade(img, -spdImg);
+                        colClass.ImgFade(img, -spdImg);
                     }
                     else
                     {
-                        text.text = "スタート!!";
+                        Readytext.text = "スタート!!";
                         timer += Time.deltaTime;
                         if (timer >= maxTime)
                         {
@@ -151,22 +149,22 @@ public class GameManager : MonoBehaviour
                             timer = 0;
 
                             // 入力の受付開始
-                            game = GAME.PLAY;
-                            Destroy(text);
+                            gameState = GAME.PLAY;
+                            Destroy(Readytext);
                         }
                     }
                 }
                 break;
             case GAME.PLAY: // ゲーム開始
                 // 勝敗
-                if (p1Controller.LOSEFLAG)
+                if (p1Controller.IsLose)
                 {
-                    winLose = true;
-                    game = GAME.RESULT;
+                    isLose = true;
+                    gameState = GAME.RESULT;
                     
                     return;
                 }
-                // p2の死亡処理はデバッグプレイのためコメント
+                // p2の死亡処理はデバッグ中のためコメント
                 //else if (p2Controller.LOSEFLAG)
                 //{
                 //    winLose = false;
@@ -177,12 +175,12 @@ public class GameManager : MonoBehaviour
                 generator.GENERATOR();
 
                 // それぞれの盤面にコマを生成
-                if (p1Controller.IsFLAG)
+                if (p1Controller.CanNextPuzzle)
                 {
                     // ネクスト表示を更新して新規生成
                     p1Controller.GeneObj();
                 }
-                if (p2Controller.IsFLAG)
+                if (p2Controller.CanNextPuzzle)
                 {
                     // ネクスト表示を更新して新規生成
                     p2Controller.GeneObj();
@@ -196,20 +194,20 @@ public class GameManager : MonoBehaviour
                 // フェード
                 if (img.color.a <= 0.5f)
                 {
-                    col.ImgFade(img, spdImg);
+                    colClass.ImgFade(img, spdImg);
                 }
                 else
                 {
                     // 勝敗のテキスト
-                    if(winLose)
+                    if(isLose)
                     {
-                        PlLtex.text = "LOSE";
-                        PlRtex.text = "WIN!!";
+                        Pl1text.text = "LOSE";
+                        Pl2text.text = "WIN!!";
                     }
                     else
                     {
-                        PlLtex.text = "WIN!!";
-                        PlRtex.text = "LOSE";
+                        Pl1text.text = "WIN!!";
+                        Pl2text.text = "LOSE";
                     }
                 }
                 Debug.Log("結果発表");
