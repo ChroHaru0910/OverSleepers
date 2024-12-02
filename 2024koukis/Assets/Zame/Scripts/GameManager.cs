@@ -65,6 +65,32 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        SetUpStart();
+    }
+
+    void Update()
+    {
+        // ゲームループはここで
+        switch(gameState)
+        {
+            case GAME.READY:  // ゲームの状態はready 正しくデータをもらえたらスタートしていく
+                StateReady();
+                break;
+            case GAME.START:  // ゲームスタートの合図を送る
+                StateStart();
+                break;
+            case GAME.PLAY:   // ゲーム開始
+                StatePlay();
+                break;
+            case GAME.RESULT: // 勝敗
+                StateResult();
+                break;
+        }
+    }
+
+    // データのセット(Startで呼び出すよ)
+    private void SetUpStart()
+    {
         // データ読み込み
         variable.LoadJson();
 
@@ -72,7 +98,7 @@ public class GameManager : MonoBehaviour
         value.SETUP();
 
         // プレイヤー１に値をセット
-        p1Controller.SetUp=value.DROPSPD;
+        p1Controller.SetUp = value.DROPSPD;
 
         // インスタンス生成
         colClass = new ColFade();
@@ -107,113 +133,125 @@ public class GameManager : MonoBehaviour
         p2Controller.STARTSET();
     }
 
-    void Update()
+    // gameStateの処理内容
+    #region State
+    /// <summary>
+    /// スタート前の準備
+    /// </summary>
+    private void StateReady()
     {
-        // ゲームループはここで
-        switch(gameState)
+        // startメソッドでデータが正しく貰えてない場合に
+        if (listLEFT.Count == 0 || listRIGHT.Count == 0)
         {
-            case GAME.READY: // ゲームの状態はready 正しくデータをもらえたらスタートしていく
-                 // startメソッドでデータが正しく貰えてない場合に
-                if (listLEFT.Count == 0 || listRIGHT.Count == 0)
-                {
-                    Debug.Log("再度リストを貰います");
-                    // 盤面保存
-                    boardLEFT.LeftSet();
-                    boardRIGHT.RightSet();
-                    // 保存したリストを貰い受ける
-                    listLEFT = boardLEFT.ReturnList();
-                    listRIGHT = boardRIGHT.ReturnList();
-                }
+            Debug.Log("再度リストを貰います");
+            // 盤面保存
+            boardLEFT.LeftSet();
+            boardRIGHT.RightSet();
+            // 保存したリストを貰い受ける
+            listLEFT = boardLEFT.ReturnList();
+            listRIGHT = boardRIGHT.ReturnList();
+        }
 
-                timer += Time.deltaTime;
-                if (timer >= maxTime)
-                {
-                    // タイマーの値を元通りに
-                    timer = 0;
-                    gameState = GAME.START;
-                }
-                break;
-            case GAME.START: // ゲームスタートの合図を送る
-                {
-                    if (img.color.a >= 0)
-                    {
-                        colClass.ImgFade(img, -spdImg);
-                    }
-                    else
-                    {
-                        Readytext.text = "スタート!!";
-                        timer += Time.deltaTime;
-                        if (timer >= maxTime)
-                        {
-                            // タイマーの値を元通りに
-                            timer = 0;
-
-                            // 入力の受付開始
-                            gameState = GAME.PLAY;
-                            Destroy(Readytext);
-                        }
-                    }
-                }
-                break;
-            case GAME.PLAY: // ゲーム開始
-                // 勝敗
-                if (p1Controller.IsLose)
-                {
-                    isLose = true;
-                    gameState = GAME.RESULT;
-                    
-                    return;
-                }
-                // p2の死亡処理はデバッグ中のためコメント
-                //else if (p2Controller.LOSEFLAG)
-                //{
-                //    winLose = false;
-                //    game = GAME.RESULT;
-                //}
-
-                // 駒を生成
-                generator.GENERATOR();
-
-                // それぞれの盤面にコマを生成
-                if (p1Controller.CanNextPuzzle)
-                {
-                    // ネクスト表示を更新して新規生成
-                    p1Controller.GeneObj();
-                }
-                if (p2Controller.CanNextPuzzle)
-                {
-                    // ネクスト表示を更新して新規生成
-                    p2Controller.GeneObj();
-                }
-
-                // プレイヤー更新
-                p1Controller.Game();
-                p2Controller.Game();
-                break;
-            case GAME.RESULT:
-                // フェード
-                if (img.color.a <= 0.5f)
-                {
-                    colClass.ImgFade(img, spdImg);
-                }
-                else
-                {
-                    // 勝敗のテキスト
-                    if(isLose)
-                    {
-                        Pl1text.text = "LOSE";
-                        Pl2text.text = "WIN!!";
-                    }
-                    else
-                    {
-                        Pl1text.text = "WIN!!";
-                        Pl2text.text = "LOSE";
-                    }
-                }
-                Debug.Log("結果発表");
-
-                // ここから再戦できるようにする
-                break;
+        timer += Time.deltaTime;
+        if (timer >= maxTime)
+        {
+            // タイマーの値を元通りに
+            timer = 0;
+            gameState = GAME.START;
         }
     }
+
+    /// <summary>
+    /// ゲームスタートの合図を送る
+    /// </summary>
+    private void StateStart()
+    {
+        if (img.color.a >= 0)
+        {
+            colClass.ImgFade(img, -spdImg);
+        }
+        else
+        {
+            Readytext.text = "スタート!!";
+            timer += Time.deltaTime;
+            if (timer >= maxTime)
+            {
+                // タイマーの値を元通りに
+                timer = 0;
+
+                // 入力の受付開始
+                gameState = GAME.PLAY;
+                Destroy(Readytext);
+            }
+        }
+    }
+
+
+    /// <summary>
+    ///  ゲーム開始
+    /// </summary>
+    private void StatePlay()
+    {
+        // 勝敗
+        if (p1Controller.IsLose)
+        {
+            isLose = true;
+            gameState = GAME.RESULT;
+
+            return;
+        }
+        // p2の死亡処理はデバッグ中のためコメント
+        //else if (p2Controller.LOSEFLAG)
+        //{
+        //    winLose = false;
+        //    game = GAME.RESULT;
+        //}
+
+        // 駒を生成
+        generator.GENERATOR();
+
+        // それぞれの盤面にコマを生成
+        if (p1Controller.CanNextPuzzle)
+        {
+            // ネクスト表示を更新して新規生成
+            p1Controller.GeneObj();
+        }
+        if (p2Controller.CanNextPuzzle)
+        {
+            // ネクスト表示を更新して新規生成
+            p2Controller.GeneObj();
+        }
+
+        // プレイヤー更新
+        p1Controller.Game();
+        p2Controller.Game();
+    }
+
+    /// <summary>
+    /// 勝敗表示
+    /// </summary>
+    private void StateResult()
+    {
+        // フェード
+        if (img.color.a <= 0.5f)
+        {
+            colClass.ImgFade(img, spdImg);
+        }
+        else
+        {
+            // 勝敗のテキスト
+            if (isLose)
+            {
+                Pl1text.text = "LOSE";
+                Pl2text.text = "WIN!!";
+            }
+            else
+            {
+                Pl1text.text = "WIN!!";
+                Pl2text.text = "LOSE";
+            }
+        }
+        Debug.Log("結果発表");
+    }
+    #endregion
 }

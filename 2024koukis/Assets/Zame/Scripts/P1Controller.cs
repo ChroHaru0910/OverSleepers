@@ -51,6 +51,7 @@ public class P1Controller : MonoBehaviour
         ChainPuzzle();
         Droppuzzle();
     }
+
     /// <summary>
     /// 落下速度の設定
     /// </summary>
@@ -58,6 +59,7 @@ public class P1Controller : MonoBehaviour
     {
         set { dropTime = value; }
     }
+
     /// <summary>
     /// 入力処理
     /// </summary>
@@ -102,6 +104,7 @@ public class P1Controller : MonoBehaviour
         mypuzzleObj.Add(ParentObj);
         canNext = false;
     }
+
     // ネクスト表示関連メソッド
     #region NEXTOBJ
     /// <summary>
