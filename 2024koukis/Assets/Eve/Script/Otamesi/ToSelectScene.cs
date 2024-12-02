@@ -22,15 +22,7 @@ public class ToSelectScene : MonoBehaviour
         {
             settingObj.SetActive(true);
         }
-        else if (settingObj.activeSelf == true)
-        {
-            OpenMenu();
-        }
-    }
-
-    void OpenMenu()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        else if (settingObj.activeSelf == true&&Input.GetKeyDown(KeyCode.Escape))
         {
             settingObj.SetActive(false);
         }
