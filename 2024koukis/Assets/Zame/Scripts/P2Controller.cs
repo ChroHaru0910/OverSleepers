@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class P2Controller : MonoBehaviour
 {
     // 変数まとめ
@@ -21,16 +22,16 @@ public class P2Controller : MonoBehaviour
     GameObject ParentObj;
 
     // 自由落下する速度
-    const float CONSTdropTime = 0.5f; // 最大時間
-    float dropTime = 0.5f;            // 時間設定
-    float dropTimerCnt = 0.0f;        // カウント用
+    float defaultDrop = 0.5f; // デフォルトの値(データが読み込まない場合)
+    float dropTime = 0.5f;      // 時間設定
+    float dropTimerCnt = 0.0f;  // カウント用
 
     // 移動制限
     int Cy = 9;
     int Cx = 3;
 
-    // 着地したか判断
-    bool isFlg = true;
+    // 次のコマの生成タイミング
+    bool canNext = true;
     // 負け判定
     bool gameLoseFlg = false;
 
@@ -51,8 +52,13 @@ public class P2Controller : MonoBehaviour
         ChainPuzzle();
         Droppuzzle();
     }
-
-  
+    /// <summary>
+    /// 落下速度の設定
+    /// </summary>
+    public float SetUp
+    {
+        set { dropTime = value; }
+    }
     /// <summary>
     /// 入力処理
     /// </summary>
@@ -76,7 +82,7 @@ public class P2Controller : MonoBehaviour
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
-            dropTime = CONSTdropTime;  // 通常の落下速度に戻す
+            dropTime = defaultDrop;  // 通常の落下速度に戻す
         }
     }
 
@@ -95,8 +101,9 @@ public class P2Controller : MonoBehaviour
         ParentObj = Instantiate(puzzleQueue.Dequeue(), initialPosition, Quaternion.identity);
         ParentObj.transform.parent = P2.transform;
         mypuzzleObj.Add(ParentObj);
-        isFlg = false;
+        canNext = false;
     }
+
     // ネクスト表示関連メソッド
     #region NEXTOBJ
     /// <summary>
@@ -146,7 +153,7 @@ public class P2Controller : MonoBehaviour
         }
     }
 
-    public bool LOSEFLAG
+    public bool IsLose
     {
         get { return gameLoseFlg; }
     }
@@ -157,7 +164,7 @@ public class P2Controller : MonoBehaviour
     // 落下処理
     private void Droppuzzle()
     {
-        if (isFlg) { return; }
+        if (canNext) { return; }
         dropTimerCnt += Time.deltaTime;
 
         if (dropTimerCnt >= dropTime)
@@ -166,7 +173,7 @@ public class P2Controller : MonoBehaviour
             if (Cy < 0)
             {
                 CheckAndClearPuzzle();
-                isFlg = true;
+                canNext = true;
             }
             else
             {
@@ -179,13 +186,13 @@ public class P2Controller : MonoBehaviour
                 {
                     CheckAndClearPuzzle();
                     LoseMethod();
-                    isFlg = true;
+                    canNext = true;
                 }
             }
         }
     }
 
-    
+
 
     // 現在操作中のコマの下に別のコマが存在するか
     private bool SetPuzzle(GameObject obj)
@@ -247,7 +254,7 @@ public class P2Controller : MonoBehaviour
     /// <summary>
     /// 次のコマを生成するタイミングを返す
     /// </summary>
-    public bool IsFLAG { get { return isFlg; } }
+    public bool CanNextPuzzle { get { return canNext; } }
 
     /// <summary>
     /// 盤面の座標を貰う
@@ -302,7 +309,7 @@ public class P2Controller : MonoBehaviour
                 case 0:
                     ShiftPuzzlesDown();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -311,7 +318,7 @@ public class P2Controller : MonoBehaviour
                 case 1:
                     CheckAndClearPuzzle();
                     timer += Time.deltaTime;
-                    if (timer >= 0.25f)
+                    if (timer >= 0.3f)
                     {
                         timer = 0;
                         num++;
@@ -319,9 +326,22 @@ public class P2Controller : MonoBehaviour
                     break;
                 case 2:
                     ShiftPuzzlesDown();
-                    timer = 0.25f; // 次の処理スキップ
-                    puzzleCleared = false;
-                    num = 0;
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        puzzleCleared = false;
+                        CheckAndClearPuzzle();
+                        timer = 0;
+                        num++;
+                    }
+                    break;
+                case 3:
+                    timer += Time.deltaTime;
+                    if (timer >= 0.3f)
+                    {
+                        timer = 0;
+                        num = 0;
+                    }
                     break;
             }
         }
