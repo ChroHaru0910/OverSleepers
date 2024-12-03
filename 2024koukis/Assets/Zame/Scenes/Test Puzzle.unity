@@ -8445,9 +8445,9 @@ MonoBehaviour:
   boardRIGHT: {fileID: 452858064}
   img: {fileID: 20704362}
   spdImg: 0.1
-  text: {fileID: 1589896310}
-  PlLtex: {fileID: 2015651177}
-  PlRtex: {fileID: 845796560}
+  Readytext: {fileID: 1589896310}
+  Pl1text: {fileID: 2015651177}
+  Pl2text: {fileID: 845796560}
   generator: {fileID: 40078789}
   p1Controller: {fileID: 2144268170}
   p2Controller: {fileID: 2144268169}

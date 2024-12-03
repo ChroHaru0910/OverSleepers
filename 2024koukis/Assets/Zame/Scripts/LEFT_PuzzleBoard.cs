@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// 一つにまとめる
 public class LEFT_PuzzleBoard : MonoBehaviour
 {
     // 親オブジェクト
@@ -9,6 +10,10 @@ public class LEFT_PuzzleBoard : MonoBehaviour
 
     // ポジションをリストに保存
     List<LEFTWolrdVec2> objList = new List<LEFTWolrdVec2>();
+
+    // newでobjを作成
+    // 拡張機能
+    // 拡張しやすく作る
 
     //子要素クラスを使用して配列を作成
     public ChildArray[] rows;
@@ -76,6 +81,8 @@ public class LEFT_PuzzleBoard : MonoBehaviour
     }
 
 }
+
+// 別スクリプトに
 public class LEFTWolrdVec2
 {
     public Vector2[] posColumns;
