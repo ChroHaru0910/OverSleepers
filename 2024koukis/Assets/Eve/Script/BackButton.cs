@@ -5,9 +5,11 @@ using UnityEngine.UI;
 
 public class BackButton : MonoBehaviour
 {
-    [SerializeField] GameObject obj;   
-    public void OnClickBackButton()
+    [SerializeField] GameObject obj;
+    [SerializeField] GameObject cursor;
+    public void OnClickButton()
     {
         obj.SetActive(false);
+        cursor.SetActive(false);
     }
 }
