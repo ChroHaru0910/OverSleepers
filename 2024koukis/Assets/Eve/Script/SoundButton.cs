@@ -5,7 +5,7 @@ using UnityEngine;
 public class SoundButton : MonoBehaviour
 {
     public GameObject soundObj;
-    public void OnClickSoundButton()
+    public void OnClickButton()
     {
         soundObj.SetActive(true);
     }
