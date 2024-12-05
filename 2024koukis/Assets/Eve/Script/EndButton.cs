@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class EndButton : MonoBehaviour
 {
-    public void OnClickEndButton()
+    public void OnClickButton()
     {
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;//ゲームプレイ終了
