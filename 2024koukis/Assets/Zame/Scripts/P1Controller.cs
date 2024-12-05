@@ -6,6 +6,8 @@ public class P1Controller : MonoBehaviour
 {
     // 変数まとめ
     #region Field
+    // コンボ数表示
+    [SerializeField] ComboText comboText;
     // 生成した駒をまとめるオブジェクト
     [SerializeField] GameObject P1;
     // 生成するコマの情報
@@ -42,6 +44,9 @@ public class P1Controller : MonoBehaviour
     // ネクスト表示
     NextPuzzleUI next;
     [SerializeField] Image[] images;
+
+    // コンボ数
+    int combo = 0;
     #endregion
 
     // GameManagerで呼び出し
@@ -50,6 +55,7 @@ public class P1Controller : MonoBehaviour
         P1Input();
         ChainPuzzle();
         Droppuzzle();
+        comboText.OutCombo(combo, ComboText.Player.P1) ;
     }
 
     /// <summary>
@@ -98,7 +104,7 @@ public class P1Controller : MonoBehaviour
         timer = 0;
         Cy = 9;
         Cx = 3;
-        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y + 0.7f);
+        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y );
         ParentObj = Instantiate(puzzleQueue.Dequeue(), initialPosition, Quaternion.identity);
         ParentObj.transform.parent = P1.transform;
         mypuzzleObj.Add(ParentObj);
@@ -168,6 +174,7 @@ public class P1Controller : MonoBehaviour
     private void Droppuzzle()
     {
         if (canNext) { return; }
+        combo = 0;
         dropTimerCnt += Time.deltaTime;
 
         if (dropTimerCnt >= dropTime)
@@ -282,6 +289,7 @@ public class P1Controller : MonoBehaviour
             {
                 if (ClearPuzzleIfSurrounded(x, y, 1, 0)) // 横方向のチェック (dx=1, dy=0)
                 {
+                    combo++;
                     puzzleCleared = true;
                 }
             }
@@ -294,6 +302,7 @@ public class P1Controller : MonoBehaviour
             {
                 if (ClearPuzzleIfSurrounded(x, y, 0, 1)) // 縦方向のチェック (dx=0, dy=1)
                 {
+                    combo++;
                     puzzleCleared = true;
                 }
             }
