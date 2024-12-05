@@ -6,6 +6,8 @@ public class P1Controller : MonoBehaviour
 {
     // 変数まとめ
     #region Field
+    // コンボ数表示
+    [SerializeField] ComboText comboText;
     // 生成した駒をまとめるオブジェクト
     [SerializeField] GameObject P1;
     // 生成するコマの情報
@@ -29,8 +31,8 @@ public class P1Controller : MonoBehaviour
     int Cy = 9;
     int Cx = 3;
 
-    // 着地したか判断
-    bool isFlg = true;
+    // 次のコマの生成タイミング
+    bool canNext = true;
     // 負け判定
     bool gameLoseFlg = false;
 
@@ -42,6 +44,9 @@ public class P1Controller : MonoBehaviour
     // ネクスト表示
     NextPuzzleUI next;
     [SerializeField] Image[] images;
+
+    // コンボ数
+    int combo = 0;
     #endregion
 
     // GameManagerで呼び出し
@@ -50,7 +55,9 @@ public class P1Controller : MonoBehaviour
         P1Input();
         ChainPuzzle();
         Droppuzzle();
+        comboText.OutCombo(combo, ComboText.Player.P1) ;
     }
+
     /// <summary>
     /// 落下速度の設定
     /// </summary>
@@ -58,6 +65,7 @@ public class P1Controller : MonoBehaviour
     {
         set { dropTime = value; }
     }
+
     /// <summary>
     /// 入力処理
     /// </summary>
@@ -96,12 +104,13 @@ public class P1Controller : MonoBehaviour
         timer = 0;
         Cy = 9;
         Cx = 3;
-        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y + 0.7f);
+        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y );
         ParentObj = Instantiate(puzzleQueue.Dequeue(), initialPosition, Quaternion.identity);
         ParentObj.transform.parent = P1.transform;
         mypuzzleObj.Add(ParentObj);
-        isFlg = false;
+        canNext = false;
     }
+
     // ネクスト表示関連メソッド
     #region NEXTOBJ
     /// <summary>
@@ -151,18 +160,21 @@ public class P1Controller : MonoBehaviour
         }
     }
 
-    public bool LOSEFLAG
+    public bool IsLose
     {
         get { return gameLoseFlg; }
     }
     #endregion
+
+    // コマクラスを作る
 
     // コマの移動に関するメソッド（盤面も含む）
     #region PUZZLEMOVE
     // 落下処理
     private void Droppuzzle()
     {
-        if (isFlg) { return; }
+        if (canNext) { return; }
+        combo = 0;
         dropTimerCnt += Time.deltaTime;
 
         if (dropTimerCnt >= dropTime)
@@ -171,7 +183,7 @@ public class P1Controller : MonoBehaviour
             if (Cy < 0)
             {
                 CheckAndClearPuzzle();
-                isFlg = true;
+                canNext = true;
             }
             else
             {
@@ -184,7 +196,7 @@ public class P1Controller : MonoBehaviour
                 {
                     CheckAndClearPuzzle();
                     LoseMethod();
-                    isFlg = true;
+                    canNext = true;
                 }
             }
         }
@@ -252,7 +264,7 @@ public class P1Controller : MonoBehaviour
     /// <summary>
     /// 次のコマを生成するタイミングを返す
     /// </summary>
-    public bool IsFLAG { get { return isFlg; } }
+    public bool CanNextPuzzle { get { return canNext; } }
 
     /// <summary>
     /// 盤面の座標を貰う
@@ -277,6 +289,7 @@ public class P1Controller : MonoBehaviour
             {
                 if (ClearPuzzleIfSurrounded(x, y, 1, 0)) // 横方向のチェック (dx=1, dy=0)
                 {
+                    combo++;
                     puzzleCleared = true;
                 }
             }
@@ -289,6 +302,7 @@ public class P1Controller : MonoBehaviour
             {
                 if (ClearPuzzleIfSurrounded(x, y, 0, 1)) // 縦方向のチェック (dx=0, dy=1)
                 {
+                    combo++;
                     puzzleCleared = true;
                 }
             }
@@ -353,45 +367,98 @@ public class P1Controller : MonoBehaviour
     /// <param name="dx">X軸方向の移動量</param>
     /// <param name="dy">Y軸方向の移動量</param>
     /// <returns>駒が消えた場合true</returns>
-    private bool ClearPuzzleIfSurrounded(int x, int y, int dx, int dy)
+    private bool ClearPuzzleIfSurrounded(float x, float y, float dx, float dy)
     {
+        Debug.Log("色の探索を開始");
+
         // 始点の駒を取得
         GameObject startPuzzle = GetPuzzleAt(x, y);
         if (startPuzzle == null) return false;
 
-        // 終点の駒を取得
-        int oppositeX = x + dx * 2;
-        int oppositeY = y + dy * 2;
-        GameObject endPuzzle = GetPuzzleAt(oppositeX, oppositeY);
-
-        if (endPuzzle == null) return false;
-
-        // スプライトを取得
+        // 始点のスプライト
         Sprite startSprite = GetPuzzleSprite(startPuzzle);
-        Sprite endSprite = GetPuzzleSprite(endPuzzle);
+        if (startSprite == null) return false;
 
-        // 始点と終点のスプライトが一致している場合
-        if (startSprite == endSprite && startSprite != null)
+        // 中間の駒リスト
+        List<GameObject> middlePuzzles = new List<GameObject>();
+        List<Sprite> middleSprites = new List<Sprite>();
+
+        // 終点の駒
+        GameObject endPuzzle = null;
+
+        // 中間駒の探索
+        int maxSearchRange = 10; // 最大探索範囲
+        for (int i = 1; i < maxSearchRange; i++)
         {
-            // 中間の駒を取得
-            GameObject middlePuzzle = GetPuzzleAt(x + dx, y + dy);
-            if (middlePuzzle != null)
-            {
-                Sprite middleSprite = GetPuzzleSprite(middlePuzzle);
+            // 次の駒の座標を計算
+            float checkX = x + dx * i;
+            float checkY = y + dy * i;
 
-                // 中間のスプライトが異なる場合
-                if (middleSprite != startSprite)
-                {
-                    RemovePuzzle(startPuzzle);
-                    RemovePuzzle(middlePuzzle);
-                    RemovePuzzle(endPuzzle);
-                    return true; // 駒を消した場合はtrueを返す
-                }
+            // 駒を取得
+            GameObject currentPuzzle = GetPuzzleAt(checkX, checkY);
+            if (currentPuzzle == null) break;
+
+            // スプライトを取得
+            Sprite currentSprite = GetPuzzleSprite(currentPuzzle);
+            if (currentSprite == null) break;
+
+            // 始点と同じスプライトを発見 → 終点とする
+            if (currentSprite == startSprite)
+            {
+                endPuzzle = currentPuzzle; // 終点を設定
+                break;
+            }
+
+            // 中間の駒としてリストに追加
+            middlePuzzles.Add(currentPuzzle);
+            middleSprites.Add(currentSprite);
+        }
+
+        // 終点が見つからない場合、消去できない
+        if (endPuzzle == null)
+        {
+            Debug.Log("終点が見つからないため消去できません");
+            return false;
+        }
+
+        // 中間の駒がない場合、消去できない
+        if (middlePuzzles.Count == 0)
+        {
+            Debug.Log("中間の駒がないため消去できません");
+            return false;
+        }
+
+        // 中間の駒がすべて同じ色か判定
+        Sprite firstMiddleSprite = middleSprites[0];
+        foreach (Sprite sprite in middleSprites)
+        {
+            if (sprite != firstMiddleSprite)
+            {
+                Debug.Log("中間の駒が複数の色を持っています");
+                return false; // 異なる色があれば終了
             }
         }
 
-        return false;
+        // 中間の駒の色が始点や終点の色と異なるか確認
+        if (firstMiddleSprite == startSprite)
+        {
+            Debug.Log("中間の駒の色が始点と同じため消去できません");
+            return false;
+        }
+
+        // 駒を削除する
+        Debug.Log("駒を消去します");
+        foreach (GameObject puzzle in middlePuzzles)
+        {
+            RemovePuzzle(puzzle); // 中間駒を削除
+        }
+        RemovePuzzle(startPuzzle); // 始点を削除
+        RemovePuzzle(endPuzzle); // 終点を削除
+
+        return true; // 駒を消した場合はtrueを返す
     }
+
+
     private void RemovePuzzle(GameObject puzzle)
     {
         if (mypuzzleObj.Contains(puzzle))
@@ -444,12 +511,12 @@ public class P1Controller : MonoBehaviour
     /// <summary>
     /// 指定位置のパズルオブジェクトを取得
     /// </summary>
-    private GameObject GetPuzzleAt(int x, int y)
+    private GameObject GetPuzzleAt(float x, float y)
     {
-        if (y < 0 || y >= listLEFT.Count || x < 0 || x >= listLEFT[y].posColumns.Length)
+        if (y < 0 || y >= listLEFT.Count || x < 0 || x >= listLEFT[(int)y].posColumns.Length)
             return null;
 
-        Vector2 targetPos = listLEFT[y].posColumns[x];
+        Vector2 targetPos = listLEFT[(int)y].posColumns[(int)x];
         foreach (GameObject puzzle in mypuzzleObj)
         {
             if (Mathf.Approximately(puzzle.transform.position.x, targetPos.x) &&
