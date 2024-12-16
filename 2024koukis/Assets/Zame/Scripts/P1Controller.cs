@@ -6,6 +6,8 @@ public class P1Controller : MonoBehaviour
 {
     // 変数まとめ
     #region Field
+    // コンボ数表示
+    [SerializeField] ComboText comboText;
     // 生成した駒をまとめるオブジェクト
     [SerializeField] GameObject P1;
     // 生成するコマの情報
@@ -39,9 +41,18 @@ public class P1Controller : MonoBehaviour
     int num = 0;
     float timer = 0;
 
+    // 削除予定のオブジェクトをまとめる
+    List<GameObject> trash = new List<GameObject>();
+    bool isCheck = false;
+
     // ネクスト表示
     NextPuzzleUI next;
     [SerializeField] Image[] images;
+
+    // コンボ数
+    int combo = 0;
+
+  
     #endregion
 
     // GameManagerで呼び出し
@@ -50,6 +61,7 @@ public class P1Controller : MonoBehaviour
         P1Input();
         ChainPuzzle();
         Droppuzzle();
+        comboText.OutCombo(combo, ComboText.Player.P1) ;
     }
 
     /// <summary>
@@ -94,11 +106,15 @@ public class P1Controller : MonoBehaviour
     {
         // 連鎖中の場合は生成しない
         if (puzzleCleared) { return; }
+
+        // 初期状態に戻す
+        isCheck = false;
+
         NextOBJ();
         timer = 0;
         Cy = 9;
         Cx = 3;
-        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y + 0.7f);
+        Vector2 initialPosition = new Vector2(listLEFT[Cy].posColumns[Cx].x, listLEFT[Cy].posColumns[Cx].y );
         ParentObj = Instantiate(puzzleQueue.Dequeue(), initialPosition, Quaternion.identity);
         ParentObj.transform.parent = P1.transform;
         mypuzzleObj.Add(ParentObj);
@@ -168,6 +184,7 @@ public class P1Controller : MonoBehaviour
     private void Droppuzzle()
     {
         if (canNext) { return; }
+        combo = 0;
         dropTimerCnt += Time.deltaTime;
 
         if (dropTimerCnt >= dropTime)
@@ -298,36 +315,133 @@ public class P1Controller : MonoBehaviour
                 }
             }
         }
+
+        isCheck = true;
     }
 
+    /// <summary>
+    /// 指定された位置の駒を削除すべきか判定し、削除する処理
+    /// </summary>
+    private bool ClearPuzzleIfSurrounded(float x, float y, float dx, float dy)
+    {
+        // 始点の駒取得
+        GameObject startPuzzle = GetPuzzleAt(x, y);
+        if (startPuzzle == null) return false;
 
-    // 連鎖処理
+        Sprite startSprite = GetPuzzleSprite(startPuzzle);
+        if (startSprite == null) return false;
+
+        // 中間駒リスト
+        List<GameObject> middlePuzzles = new List<GameObject>();
+        List<Sprite> middleSprites = new List<Sprite>();
+        GameObject endPuzzle = null;
+
+        // 中間駒の探索
+        int maxSearchRange = 10;
+        for (int i = 1; i < maxSearchRange; i++)
+        {
+            float checkX = x + dx * i;
+            float checkY = y + dy * i;
+
+            GameObject currentPuzzle = GetPuzzleAt(checkX, checkY);
+            if (currentPuzzle == null) break;
+
+            Sprite currentSprite = GetPuzzleSprite(currentPuzzle);
+            if (currentSprite == null) break;
+
+            if (currentSprite == startSprite)
+            {
+                endPuzzle = currentPuzzle; // 終点を設定
+                break;
+            }
+
+            middlePuzzles.Add(currentPuzzle);
+            middleSprites.Add(currentSprite);
+        }
+
+        if (endPuzzle == null || middlePuzzles.Count == 0) return false;
+
+        // 中間駒の色チェック
+        Sprite firstMiddleSprite = middleSprites[0];
+        foreach (Sprite sprite in middleSprites)
+        {
+            if (sprite != firstMiddleSprite) return false;
+        }
+
+        if (firstMiddleSprite == startSprite) return false;
+
+        // 駒を削除
+        foreach (GameObject puzzle in middlePuzzles) RemovePuzzle(puzzle);
+        RemovePuzzle(startPuzzle);
+        RemovePuzzle(endPuzzle);
+
+        return true;
+    }
+
+    /// <summary>
+    /// 指定した駒を削除する
+    /// </summary>
+    private void RemovePuzzle(GameObject puzzle)
+    {
+        if (mypuzzleObj.Contains(puzzle))
+        {
+            //mypuzzleObj.Remove(puzzle);
+            trash.Add(puzzle);
+            //Destroy(puzzle);
+        }
+    }
+
+    /// <summary>
+    /// 駒の色を取得する
+    /// </summary>
+    private Sprite GetPuzzleSprite(GameObject puzzle)
+    {
+        SpriteRenderer spriteRenderer = puzzle.GetComponent<SpriteRenderer>();
+        return spriteRenderer != null ? spriteRenderer.sprite : null;
+    }
+
+    /// <summary>
+    /// 指定位置のパズルオブジェクトを取得
+    /// </summary>
+    private GameObject GetPuzzleAt(float x, float y)
+    {
+        if (y < 0 || y >= listLEFT.Count || x < 0 || x >= listLEFT[(int)y].posColumns.Length)
+            return null;
+
+        Vector2 targetPos = listLEFT[(int)y].posColumns[(int)x];
+        foreach (GameObject puzzle in mypuzzleObj)
+        {
+            if (Mathf.Approximately(puzzle.transform.position.x, targetPos.x) &&
+                Mathf.Approximately(puzzle.transform.position.y, targetPos.y))
+            {
+                return puzzle;
+            }
+        }
+        return null;
+    }
+    #endregion
+
+    #region CHAINPUZZLE
+    /// <summary>
+    /// 連鎖処理
+    /// </summary>
     private void ChainPuzzle()
     {
-        // 駒が消えた場合、コマを下に詰めさらに消せる場所を探す
         if (puzzleCleared)
         {
             switch (num)
             {
                 case 0:
-                    ShiftPuzzlesDown();
-                    timer += Time.deltaTime;
-                    if (timer >= 0.3f)
+                    if (isCheck)
                     {
-                        timer = 0;
-                        num++;
+                        foreach (GameObject obj in trash)
+                        {
+                            mypuzzleObj.Remove(obj);
+                            Destroy(obj);
+                        }
+                        isCheck = false;
+                        combo++;
                     }
-                    break;
-                case 1:
-                    CheckAndClearPuzzle();
-                    timer += Time.deltaTime;
-                    if (timer >= 0.3f)
-                    {
-                        timer = 0;
-                        num++;
-                    }
-                    break;
-                case 2:
                     ShiftPuzzlesDown();
                     timer += Time.deltaTime;
                     if (timer >= 0.3f)
@@ -338,7 +452,8 @@ public class P1Controller : MonoBehaviour
                         num++;
                     }
                     break;
-                case 3:
+
+                case 1:
                     timer += Time.deltaTime;
                     if (timer >= 0.3f)
                     {
@@ -351,124 +466,7 @@ public class P1Controller : MonoBehaviour
     }
 
     /// <summary>
-    /// 指定された位置の2つの駒を消すかどうかを判定し、消す処理
-    /// </summary>
-    /// <param name="x">チェックするX座標</param>
-    /// <param name="y">チェックするY座標</param>
-    /// <param name="dx">X軸方向の移動量</param>
-    /// <param name="dy">Y軸方向の移動量</param>
-    /// <returns>駒が消えた場合true</returns>
-    private bool ClearPuzzleIfSurrounded(float x, float y, float dx, float dy)
-    {
-        Debug.Log("色の探索を開始");
-
-        // 始点の駒を取得
-        GameObject startPuzzle = GetPuzzleAt(x, y);
-        if (startPuzzle == null) return false;
-
-        // 始点のスプライト
-        Sprite startSprite = GetPuzzleSprite(startPuzzle);
-        if (startSprite == null) return false;
-
-        // 中間の駒リスト
-        List<GameObject> middlePuzzles = new List<GameObject>();
-        List<Sprite> middleSprites = new List<Sprite>();
-
-        // 終点の駒
-        GameObject endPuzzle = null;
-
-        // 中間駒の探索
-        int maxSearchRange = 10; // 最大探索範囲
-        for (int i = 1; i < maxSearchRange; i++)
-        {
-            // 次の駒の座標を計算
-            float checkX = x + dx * i;
-            float checkY = y + dy * i;
-
-            // 駒を取得
-            GameObject currentPuzzle = GetPuzzleAt(checkX, checkY);
-            if (currentPuzzle == null) break;
-
-            // スプライトを取得
-            Sprite currentSprite = GetPuzzleSprite(currentPuzzle);
-            if (currentSprite == null) break;
-
-            // 始点と同じスプライトを発見 → 終点とする
-            if (currentSprite == startSprite)
-            {
-                endPuzzle = currentPuzzle; // 終点を設定
-                break;
-            }
-
-            // 中間の駒としてリストに追加
-            middlePuzzles.Add(currentPuzzle);
-            middleSprites.Add(currentSprite);
-        }
-
-        // 終点が見つからない場合、消去できない
-        if (endPuzzle == null)
-        {
-            Debug.Log("終点が見つからないため消去できません");
-            return false;
-        }
-
-        // 中間の駒がない場合、消去できない
-        if (middlePuzzles.Count == 0)
-        {
-            Debug.Log("中間の駒がないため消去できません");
-            return false;
-        }
-
-        // 中間の駒がすべて同じ色か判定
-        Sprite firstMiddleSprite = middleSprites[0];
-        foreach (Sprite sprite in middleSprites)
-        {
-            if (sprite != firstMiddleSprite)
-            {
-                Debug.Log("中間の駒が複数の色を持っています");
-                return false; // 異なる色があれば終了
-            }
-        }
-
-        // 中間の駒の色が始点や終点の色と異なるか確認
-        if (firstMiddleSprite == startSprite)
-        {
-            Debug.Log("中間の駒の色が始点と同じため消去できません");
-            return false;
-        }
-
-        // 駒を削除する
-        Debug.Log("駒を消去します");
-        foreach (GameObject puzzle in middlePuzzles)
-        {
-            RemovePuzzle(puzzle); // 中間駒を削除
-        }
-        RemovePuzzle(startPuzzle); // 始点を削除
-        RemovePuzzle(endPuzzle); // 終点を削除
-
-        return true; // 駒を消した場合はtrueを返す
-    }
-
-
-    private void RemovePuzzle(GameObject puzzle)
-    {
-        if (mypuzzleObj.Contains(puzzle))
-        {
-            mypuzzleObj.Remove(puzzle);
-            Destroy(puzzle);
-        }
-    }
-    /// <summary>
-    /// 駒の色を取得する
-    /// </summary>
-    private Sprite GetPuzzleSprite(GameObject puzzle)
-    {
-        SpriteRenderer spriteRenderer = puzzle.GetComponent<SpriteRenderer>();
-        return spriteRenderer != null ? spriteRenderer.sprite : null;
-    }
-
-    /// <summary>
-    /// コマを下にシフトさせる
+    /// 駒を下にシフトさせる
     /// </summary>
     private void ShiftPuzzlesDown()
     {
@@ -497,26 +495,6 @@ public class P1Controller : MonoBehaviour
                 }
             }
         }
-    }
-
-    /// <summary>
-    /// 指定位置のパズルオブジェクトを取得
-    /// </summary>
-    private GameObject GetPuzzleAt(float x, float y)
-    {
-        if (y < 0 || y >= listLEFT.Count || x < 0 || x >= listLEFT[(int)y].posColumns.Length)
-            return null;
-
-        Vector2 targetPos = listLEFT[(int)y].posColumns[(int)x];
-        foreach (GameObject puzzle in mypuzzleObj)
-        {
-            if (Mathf.Approximately(puzzle.transform.position.x, targetPos.x) &&
-                Mathf.Approximately(puzzle.transform.position.y, targetPos.y))
-            {
-                return puzzle;
-            }
-        }
-        return null;
     }
 
     /// <summary>
