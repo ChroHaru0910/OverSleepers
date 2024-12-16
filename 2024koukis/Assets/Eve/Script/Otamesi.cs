@@ -4,127 +4,215 @@ using UnityEngine;
 
 public class Otamesi : MonoBehaviour
 {
-    [SerializeField] private GenericButtonHandler geneButton;
-    [SerializeField] private BGMTxet bgmText;
-    [SerializeField] private SEText seText;
+    public List<SettingScript> settingScripts = new List<SettingScript>();
 
-    [SerializeField] private List<GameObject> selectObj = new List<GameObject>();   //カーソルを持っていきたいオブジェクト選択して、登録
-    [SerializeField] private List<GameObject> windowObj = new List<GameObject>();   //ウィンドウオブジェリスト
+    public WindowTitle windowTitle;
 
-    private List<Vector3> selectPos = new List<Vector3>();  //selectObjの座標を登録
+    public List<GameObject> windowObj = new List<GameObject>();             //各ウィンドウのリスト
+    public List<Vector3> buttonsPos = new List<Vector3>();                  //ボタンリストに追加されたボタンのPosリスト
+    private List<float> widths = new List<float>();
 
-    public RectTransform[] uiElements;  //RectTransform内にあるWidthを使うため
 
-    private List<float> widths = new List<float>(); //selectObjの幅を登録
-    private float myWidth;  //カーソル自身の幅
+    public GameObject cursor;                                               //カーソルオブジェクト
 
-    private int selectNum;  //今現在カーソルがどこを指しているか
 
-    RectTransform rect;
-    
-    // Start is called before the first frame update
-    void Start()
+    private RectTransform rectTransform;                                    //RectTransform
+    public RectTransform[] settingButtons;
+    public RectTransform[] soundButtons;
+
+
+    private int selectNum;
+    private int selectMax;
+    private int selectMin = 0;
+
+
+    private float cursorWidth;
+
+
+    public enum WindowElement
     {
-        for (int i = 0; i < 2; i++)
-        {
-            Debug.Log("re");
-        }
+        None,               //何もメニューを開いていない状態
+        Select,             //セレクトメニュー
+        Sound,              //音量設定メニュー
+        WindowSize,         //画面サイズ設定メニュー
+        Device,             //デバイス変更メニュー
+    }
 
-        if (bgmText == null)
-        {
-            bgmText = FindObjectOfType<BGMTxet>();
-        }
-        if (seText == null)
-        {
-            seText = FindObjectOfType<SEText>();
-        }
-        if (geneButton == null)
-        {
-            geneButton = FindObjectOfType<GenericButtonHandler>();
-        }
+    WindowElement windowState = WindowElement.None;
 
-        //selectObjが選択されていないとき、コンソールに出力
-        if (selectObj.Count == 0)
-        {
-            Debug.Log("selectObjの中身がないよ");
-        }
 
-        //selectPosにselectObjの座標を登録
-        foreach(GameObject obj in selectObj)
+    private void Start()
+    {
+        for (int i = 0; i < windowObj.Count; i++)
         {
-            if (obj != null)
-            {
-                selectPos.Add(obj.transform.position);
-            }
+            windowObj[i].SetActive(false);
         }
+        cursor.SetActive(false);
 
-        //各オブジェクトの幅を登録
-        foreach(RectTransform uiElement in uiElements)
+
+        rectTransform = cursor.GetComponent<RectTransform>();
+
+        foreach (RectTransform uiElement in settingButtons)
         {
             float width = uiElement.rect.width;
 
             widths.Add(width);
         }
 
-        //初期値は0に
+
         selectNum = 0;
+        selectMax = settingButtons.Length - 1;
 
-        rect = GetComponent<RectTransform>();
+        cursorWidth = rectTransform.rect.width;
 
+        if (windowObj.Count == 0)
+        {
+            Debug.Log("windowObjが未登録です");
+        }
+        if (settingButtons.Length == 0)
+        {
+            Debug.Log("uiElementsが未登録です");
+        }
 
-        myWidth = rect.rect.width;
+        if (settingScripts.Count == 0)
+        {
+            Debug.Log("SettingScriptsが未登録です");
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        MoveCursor();   //カーソルを動かす処理
-        SelectMenu();
+        SelectState();
     }
 
-    void MoveCursor()
+    private void SwitchWindow()
     {
-        //選択されているオブジェクトの右横(オブジェクトの右半身+カーソルの左半身分)
-        rect.position = new Vector3
-            (selectPos[selectNum].x + (widths[selectNum] / 2) + (myWidth / 2),
-            selectPos[selectNum].y,
-            selectPos[selectNum].z);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            for (int i = 0; i < settingButtons.Length; i++)
+            {
+                buttonsPos.Add(settingButtons[i].transform.localPosition);
+            }
+            selectMax = settingButtons.Length - 1;
 
-        if (Input.GetKeyDown(KeyCode.UpArrow) && selectNum > 0)
+            windowObj[0].SetActive(true);
+            cursor.SetActive(true);
+
+            windowState = WindowElement.Select;
+        }
+    }
+
+    private void MoveCursor()
+    {
+        //rectTransform.anchoredPosition += new Vector2(1, 0);
+        if (Input.GetKeyDown(KeyCode.UpArrow) && selectNum > selectMin)
         {
             selectNum--;
         }
-        else if (Input.GetKeyDown(KeyCode.DownArrow) && selectNum < selectObj.Count - 1)
+        else if (Input.GetKeyDown(KeyCode.DownArrow) && selectNum < selectMax)
         {
             selectNum++;
         }
+
+        cursor.transform.localPosition = new Vector3
+            (buttonsPos[selectNum].x + (widths[selectNum] / 2) + (cursorWidth / 2),
+            buttonsPos[selectNum].y,
+            buttonsPos[selectNum].z);
     }
 
-    void SelectMenu()
+    private void SelectMenu()
     {
-        if(Input.GetKeyDown(KeyCode.Return))
+        MoveCursor();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
         {
+            buttonsPos.Clear();
+
+            windowObj[0].SetActive(false);
+            cursor.SetActive(false);
+
+            windowState = WindowElement.None;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            buttonsPos.Clear();
             switch (selectNum)
             {
                 case 0:
-                    geneButton.ToggleActive();
+                    settingScripts[0].backButton.OnClickButton();
+                    windowState = WindowElement.None;
                     break;
+
                 case 1:
-                    bgmText.DecButton();
+                    settingScripts[0].soundButton.OnClickButton();
+                    //for (int i = 0; i < soundButtons.Length; i++)
+                    //{
+                    //    buttonsPos.Add(soundButtons[i].transform.localPosition);
+                    //}
+                    //selectMax = soundButtons.Length - 1;
+                    windowState = WindowElement.Sound;
                     break;
+
                 case 2:
-                    bgmText.IncButton();
+                    settingScripts[0].windowSizeButton.OnClickButton();
+                    windowState = WindowElement.WindowSize;
                     break;
+
                 case 3:
-                    seText.seNum += seText.changeNum;
+                    settingScripts[0].endButton.OnClickButton();
                     break;
-                case 4:
-                    seText.DecButton();
-                    break;
-                   
             }
         }
-        
+
     }
 
+    private void SoundMenu()
+    {
+        MoveCursor();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            windowObj[1].SetActive(false);
+
+            windowState = WindowElement.Select;
+        }
+    }
+
+    private void WinSizeMenu()
+    {
+        MoveCursor();
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            windowObj[2].SetActive(false);
+
+            windowState = WindowElement.Select;
+        }
+    }
+
+    private void SelectState()
+    {
+        switch (windowState)
+        {
+            case WindowElement.None:
+                SwitchWindow();
+                break;
+            case WindowElement.Select:
+                SelectMenu();
+                break;
+            case WindowElement.Sound:
+                SoundMenu();
+                Debug.Log(buttonsPos.Count);
+                break;
+
+            case WindowElement.WindowSize:
+                WinSizeMenu();
+                break;
+
+            case WindowElement.Device:
+
+                break;
+        }
+    }
 }
