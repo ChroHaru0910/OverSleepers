@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SoundButton : MonoBehaviour
 {
-    public GameObject soundObj;
+    [SerializeField] GameObject soundObj;
     public void OnClickButton()
     {
         soundObj.SetActive(true);
