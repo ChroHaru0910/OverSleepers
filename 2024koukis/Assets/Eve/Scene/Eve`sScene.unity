@@ -1085,6 +1085,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowController: {fileID: 110793188}
   cursor: {fileID: 472407883}
+  buttonPos: []
+  widths: []
   settingButtons:
   - {fileID: 1911375797}
   - {fileID: 79453461}
@@ -1732,6 +1734,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   windowController: {fileID: 110793188}
   settingScript: {fileID: 1459611568}
+  moveCursor: {fileID: 472407888}
   windowSetting: {fileID: 236250817}
 --- !u!4 &1115662784
 Transform:

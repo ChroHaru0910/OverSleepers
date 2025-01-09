@@ -6,6 +6,7 @@ public class WindowSelect : MonoBehaviour
 {
     public WindowController windowController;
     public SettingScript settingScript;
+    public MoveCursor moveCursor;
 
     [SerializeField] GameObject windowSetting;
     //[SerializeField] GameObject cursor;
@@ -48,6 +49,7 @@ public class WindowSelect : MonoBehaviour
                 case 1:
                     windowController.windowState = WindowController.WindowModeElement.Sound;
                     settingScript.soundButton.OnClickButton();
+                    moveCursor.ConvertToSounds();
                     windowController.LockStateForFrames(10);
                     break;
 

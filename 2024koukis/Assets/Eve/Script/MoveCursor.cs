@@ -39,9 +39,24 @@ public class MoveCursor : MonoBehaviour
 
     public void Move()
     {
+        if (buttonPos.Count == 0) return;
+
         cursor.transform.localPosition = new Vector3
             (buttonPos[windowController.selectNum].x + (widths[windowController.selectNum] / 2) + (cursorWidth / 2),
             buttonPos[windowController.selectNum].y,
             buttonPos[windowController.selectNum].z);
+    }
+
+    public void ConvertToSounds()
+    {
+        int alternative = buttonPos.Count;
+        for (int i = 0; i < alternative; i++)
+        {
+            buttonPos.RemoveAt(i);
+        }
+        for (int i = 0; i < soundButtons.Length; i++)
+        {
+            buttonPos.Add(soundButtons[i].transform.localPosition);
+        }
     }
 }
