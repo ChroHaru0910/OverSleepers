@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class WindowSelect : MonoBehaviour
 {
+    //別スクリプトを引用する為の変数
     public WindowController windowController;
     public SettingScript settingScript;
     public MoveCursor moveCursor;
 
+    //ウィンドウのアクティブ切り替えをする時に使う
     [SerializeField] GameObject windowSetting;
-    //[SerializeField] GameObject cursor;
 
     // Start is called before the first frame update
     void Start()
@@ -23,40 +24,47 @@ public class WindowSelect : MonoBehaviour
         {
             windowSetting.SetActive(false);
             windowController.cursor.SetActive(false);
-            windowController.windowState = WindowController.WindowModeElement.None;
-            windowController.LockStateForFrames(10);
+            windowController.windowState = WindowController.WindowModeElement.Title;        //ステートの変更
+            windowController.LockStateForFrames_Select(10);     //ディレイ
         }
 
+        //カーソルを動かす為にselectNumを変更。下キーで下に、上キーで上にカーソルが移動。
         if (Input.GetKeyDown(KeyCode.UpArrow) && windowController.selectNum > windowController.selectMin)
         {
-            windowController.selectNum--;
+            windowController.getsetSelectNum--;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow) && windowController.selectNum < windowController.selectMax)
         {
-            windowController.selectNum++;
+            windowController.getsetSelectNum++;
         }
 
-        if(Input.GetKeyDown(KeyCode.Return))
+        //カーソルの位置によって処理が異なる。Enterキーで各処理を実行
+        if (Input.GetKeyDown(KeyCode.Return)&&windowController.windowState==WindowController.WindowModeElement.Select)
         {
             switch (windowController.selectNum)
             {
+                //windowStateがTitleに変更され、各ウィンドウのアクティブ状態が切り替わる
                 case 0:
-                    windowController.windowState = WindowController.WindowModeElement.None;
                     settingScript.backButton.OnClickButton();
-                    windowController.LockStateForFrames(10);
+                    windowController.selectNum = 0;
+                    windowController.windowState = WindowController.WindowModeElement.Title;
+                    windowController.LockStateForFrames_Select(10);
                     break;
 
+                //windowStateがSoundに変更され、各ウィンドウのアクティブ状態が切り替わる
                 case 1:
-                    windowController.windowState = WindowController.WindowModeElement.Sound;
                     settingScript.soundButton.OnClickButton();
-                    moveCursor.ConvertToSounds();
-                    windowController.LockStateForFrames(10);
+                    windowController.selectMax = moveCursor.soundButtons.Length - 1;
+                    windowController.windowState = WindowController.WindowModeElement.Sound;
+                    windowController.LockStateForFrames_Sound(10);
                     break;
 
+                //windowStateがWindowSizeに変更され、各ウィンドウのアクティブ状態が切り替わる
                 case 2:
                     settingScript.windowSizeButton.OnClickButton();
                     break;
 
+                //windowStateの変更は無い。ゲームの強制終了処理を実行
                 case 3:
                     settingScript.endButton.OnClickButton();
                     break;
