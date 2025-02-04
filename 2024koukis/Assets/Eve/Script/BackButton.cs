@@ -5,11 +5,12 @@ using UnityEngine.UI;
 
 public class BackButton : MonoBehaviour
 {
-    [SerializeField] GameObject obj;
+    [SerializeField] GameObject windowSetting;
     [SerializeField] GameObject cursor;
+
     public void OnClickButton()
     {
-        obj.SetActive(false);
+        windowSetting.SetActive(false);
         cursor.SetActive(false);
     }
 }
