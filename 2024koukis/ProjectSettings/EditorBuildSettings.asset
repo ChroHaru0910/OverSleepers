@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Zame/Scenes/Test Puzzle.unity
     guid: ceec18fdae9344246a7a97bf3a5d075d
+  - enabled: 1
+    path: Assets/Zame/Scenes/TestGameScene.unity
+    guid: 9085074343f12494796cfdbed58d7343
   m_configObjects: {}
